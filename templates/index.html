@@ -9,10 +9,77 @@
 <body>
     <div class="container">
         <h1>JSON to Excel Converter</h1>
-        <form action="/" method="post" enctype="multipart/form-data">
-            <input type="file" name="json_file" accept=".json" required>
-            <button type="submit">Convert</button>
-        </form>
+        <div class="drop-zone" id="drop-zone">
+            <div class="drop-zone-text">Drag and drop a JSON file here or click to select</div>
+        </div>
+        <div class="preview" id="preview">
+            <h2>Data Preview</h2>
+            <div id="preview-content"></div>
+        </div>
     </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const previewContent = document.getElementById('preview-content');
+
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.classList.remove('dragover');
+
+            const file = event.dataTransfer.files[0];
+            if (file.type === 'application/json') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const jsonData = JSON.parse(e.target.result);
+                    const preview = generatePreview(jsonData);
+                    previewContent.innerHTML = preview;
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please drop a JSON file.');
+            }
+        });
+
+        dropZone.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.onchange = (event) => {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const jsonData = JSON.parse(e.target.result);
+                    const preview = generatePreview(jsonData);
+                    previewContent.innerHTML = preview;
+                };
+                reader.readAsText(file);
+            };
+            fileInput.click();
+        });
+
+        function generatePreview(data) {
+            let preview = '<table>';
+            for (let i = 0; i < Math.min(5, data.length); i++) {
+                preview += '<tr>';
+                for (const key in data[i]) {
+                    if (data[i].hasOwnProperty(key)) {
+                        preview += `<td>${key}</td><td>${data[i][key]}</td>`;
+                    }
+                }
+                preview += '</tr>';
+            }
+            preview += '</table>';
+            return preview;
+        }
+    </script>
 </body>
 </html>
