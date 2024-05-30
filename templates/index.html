@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON to Excel Converter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -15,12 +16,15 @@
         <div class="preview" id="preview">
             <h2>Data Preview</h2>
             <div id="preview-content"></div>
+            <canvas id="chart"></canvas>
         </div>
     </div>
 
     <script>
         const dropZone = document.getElementById('drop-zone');
         const previewContent = document.getElementById('preview-content');
+        const chartCanvas = document.getElementById('chart').getContext('2d');
+        let chart;
 
         dropZone.addEventListener('dragover', (event) => {
             event.preventDefault();
@@ -42,6 +46,7 @@
                     const jsonData = JSON.parse(e.target.result);
                     const preview = generatePreview(jsonData);
                     previewContent.innerHTML = preview;
+                    generateChart(jsonData);
                 };
                 reader.readAsText(file);
             } else {
@@ -60,6 +65,7 @@
                     const jsonData = JSON.parse(e.target.result);
                     const preview = generatePreview(jsonData);
                     previewContent.innerHTML = preview;
+                    generateChart(jsonData);
                 };
                 reader.readAsText(file);
             };
@@ -79,6 +85,55 @@
             }
             preview += '</table>';
             return preview;
+        }
+
+        function generateChart(data) {
+            if (chart) {
+                chart.destroy();
+            }
+
+            const labels = data.map(item => item.timestamp);
+            const prices = data.map(item => item.price);
+
+            chart = new Chart(chartCanvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price',
+                        data: prices,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                displayFormats: {
+                                    hour: 'MMM DD HH:mm'
+                                }
+                            },
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 10
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Price'
+                            }
+                        }]
+                    }
+                }
+            });
         }
     </script>
 </body>
