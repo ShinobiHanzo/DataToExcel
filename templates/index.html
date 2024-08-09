@@ -16,7 +16,9 @@
         <div class="preview" id="preview">
             <h2>Data Preview</h2>
             <div id="preview-content"></div>
-            <canvas id="chart"></canvas>
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -110,8 +112,8 @@
                     }]
                 },
                 options: {
-                    responsive: true,
                     maintainAspectRatio: false,
+                    responsive: true,
                     scales: {
                         xAxes: [{
                             type: 'time',
@@ -131,7 +133,9 @@
                                 labelString: 'Price'
                             }
                         }]
-                    }
+                    },
+                    width: 350,
+                    height: 200
                 }
             });
         }
